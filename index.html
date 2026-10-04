@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rahul OS — Code, Art & a Little Chaos</title>
+    <meta name="description" content="The personal desktop of Rahul Ghosh. Explore software projects, art, music, and a little creative chaos.">
+    <meta name="theme-color" content="#0649ed">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+    <header class="menu-bar">
+        <button class="brand" onclick="resetDesktop()" aria-label="Reset desktop">
+            <span class="brand-mark">R</span><span><strong>RAHUL OS</strong><small>PERSONAL COMPUTER</small></span>
+        </button>
+        <nav class="app-nav" aria-label="Portfolio apps">
+            <button class="menu-icon" data-app="dev" onclick="showWindow('dev')"><span class="icon-pixel" aria-hidden="true">⌘</span><span class="icon-label">Dev</span></button>
+            <button class="menu-icon" data-app="art" onclick="showWindow('art')"><span class="icon-pixel" aria-hidden="true">▧</span><span class="icon-label">Art</span></button>
+            <button class="menu-icon" data-app="music" onclick="showWindow('music')"><span class="icon-pixel" aria-hidden="true">♫</span><span class="icon-label">Music</span></button>
+            <button class="menu-icon" data-app="rahul" onclick="showWindow('rahul')"><span class="icon-pixel" aria-hidden="true">☺</span><span class="icon-label">Rahul</span></button>
+        </nav>
+        <div class="search-container" role="search">
+            <label class="sr-only" for="searchInput">Search portfolio</label>
+            <input type="search" id="searchInput" class="search-input" placeholder="Find something..." autocomplete="off">
+            <span id="matchCount" class="match-count" aria-live="polite"></span>
+            <button class="search-btn" onclick="nextMatch()" aria-label="Next search match">↵</button>
+        </div>
+    </header>
+    <main class="desktop" aria-label="Rahul's portfolio desktop">
+        <div class="desktop-id">EST. 2005 / VERSION 1.0</div>
+    </main>
+        <div class="wallpaper" id="desktopName">
+            <button class="name-dismiss window-control" onclick="setDesktopName(false)" aria-label="Hide desktop name for more drawing space" title="Hide name">×</button>
+            <div class="eyebrow">WORK IN PROGRESS</div>
+            <h1 tabindex="0" aria-label="Rahul Ghosh. Drag to move, or use arrow keys when focused.">RAHUL<span>GHOSH.</span></h1>
+        </div>
+    <canvas id="drawingCanvas" aria-label="Draw on the desktop with the brush tool"></canvas>
+
+    <!-- Windows -->
+    <!-- Software Dev Window -->
+    <div class="window" id="dev" style="top: 150px; left: 100px;">
+        <div class="window-title">
+            <span>[ software_dev.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <a href="https://github.com/rahulghosh05" target="_blank" class="github-link">→ GITHUB</a>
+
+            <div class="current-projects">
+                <h3>what im on rn</h3>
+                <div class="project">
+                    <div class="project-title">MUSE</div>
+                    <div class="project-desc">React/TypeScript inspiration curation app. Chrome extension + iOS companion. Supabase sync.</div>
+                    <div><span class="tag">React</span><span class="tag">TS</span><span class="tag">Supabase</span></div>
+                </div>
+            </div>
+
+            <h2>Selected work</h2>
+
+            <div class="project">
+                <div class="project-title">AirKeys</div>
+                <div class="project-desc">Gesture-controlled virtual piano. Camera-based hand tracking for music production. TouchDesigner integration.</div>
+                <div><span class="tag">ML</span><span class="tag">CV</span><span class="tag">Audio</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">BonBon</div>
+                <div class="project-desc">Multi-agent NBA/sports betting AI. Debate format analytics for predictions.</div>
+                <div><span class="tag">AI</span><span class="tag">Finance</span><span class="tag">LLM</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">Market Daemon</div>
+                <div class="project-desc">24/7 market monitoring & paper trading. Real-time data analysis & strategy execution.</div>
+                <div><span class="tag">Trading</span><span class="tag">Python</span><span class="tag">APIs</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">CMPUT 404</div>
+                <div class="project-desc">Django wiki app. Markdown editor, emoji picker, social features.</div>
+                <div><span class="tag">Django</span><span class="tag">Python</span><span class="tag">Web</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">TreeHacks 2027 <span class="incoming-label">INCOMING</span></div>
+                <div class="project-desc">Stanford hackathon. AI & full-stack exploration.</div>
+                <div><span class="tag">Hackathon</span><span class="tag">Innovation</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Digital Art Window -->
+    <div class="window" id="art" style="top: 180px; left: 750px; display: none;">
+        <div class="window-title">
+            <span>[ digital_art.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <h2>Digital Art</h2>
+            <div class="art-tabs" role="tablist" aria-label="Digital Art tabs">
+                <button id="galleryTab" class="art-tab" role="tab" aria-selected="true" aria-controls="artGallery" onclick="selectArtTab('gallery')">Graphic design</button>
+                <button id="yourWorkTab" class="art-tab" role="tab" aria-selected="false" aria-controls="yourWork" tabindex="-1" onclick="selectArtTab('work')">Your work</button>
+            </div>
+            <div class="art-gallery" id="artGallery" role="tabpanel" aria-labelledby="galleryTab">
+                <figure class="art-item">
+                    <a class="poster-link" href="assets/art/yuunme-tokyo-popup.jpg" target="_blank" rel="noopener noreferrer" aria-label="View Yuunme Tokyo pop-up poster at full size">
+                        <img class="art-item-image" src="assets/art/yuunme-tokyo-popup.jpg" width="1440" height="1920" alt="Yuunme Tokyo pop-up poster with an illustrated cat DJ and striped typography" decoding="async">
+                        <span class="poster-view">↗ VIEW FULL SIZE</span>
+                    </a>
+                    <figcaption class="art-item-info">
+                        <div class="art-item-title">Yuunme — Tokyo Pop-up</div>
+                        <div class="art-item-desc">Event poster / Shibuya, Tokyo</div>
+                    </figcaption>
+                </figure>
+                <figure class="art-item">
+                    <a class="poster-link" href="assets/art/yuunme-vancouver-popup.jpg" target="_blank" rel="noopener noreferrer" aria-label="View Yuunme Vancouver pop-up poster at full size">
+                        <img class="art-item-image" src="assets/art/yuunme-vancouver-popup.jpg" width="3000" height="3000" alt="Yuunme Vancouver pop-up poster with colorful halftone lettering and Yuunme x Baldylox branding" loading="lazy" decoding="async">
+                        <span class="poster-view">↗ VIEW FULL SIZE</span>
+                    </a>
+                    <figcaption class="art-item-info">
+                        <div class="art-item-title">Yuunme — Vancouver Pop-up</div>
+                        <div class="art-item-desc">Event poster / Vancouver, BC</div>
+                    </figcaption>
+                </figure>
+                <figure class="art-item animation-card">
+                    <button class="animation-thumbnail" onclick="playAnimation()" aria-label="Play Animation" aria-haspopup="dialog">
+                        <img src="assets/art/animation-thumbnail.jpg" alt="Preview of Animation" width="904" height="718" loading="lazy">
+                        <span class="thumbnail-play" aria-hidden="true">▶</span>
+                        <span class="thumbnail-duration" aria-hidden="true">0:12</span>
+                    </button>
+                    <figcaption class="art-item-info">
+                        <div class="art-item-title">Animation</div>
+                    </figcaption>
+                </figure>
+            </div>
+            <div id="yourWork" role="tabpanel" aria-labelledby="yourWorkTab" hidden>
+                <div id="yourWorkGallery" class="saved-drawings-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Window -->
+    <div class="window" id="music" style="top: 220px; left: 450px; display: none;">
+        <div class="window-title">
+            <span>[ music_projects.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <div class="music-error">
+                <div class="error-heading">SYSTEM ERROR</div>
+                <div class="error-body">
+                    <svg class="pixel-warning" viewBox="0 0 16 16" aria-hidden="true" shape-rendering="crispEdges">
+                        <path fill="#142450" d="M7 1h2v2h2v3h2v3h2v5H1V9h2V6h2V3h2z"/>
+                        <path fill="#faff50" d="M7 3h2v3h2v3h2v3H3V9h2V6h2z"/>
+                        <path fill="#142450" d="M7 5h2v4H7zm0 5h2v2H7z"/>
+                    </svg>
+                    <div>
+                        <p>heh im cooking smth up trust me</p>
+                    </div>
+                </div>
+                <button class="error-ok" onclick="hideWindow('music', true)">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rahul Bio/Contact/Resume Window -->
+    <div class="window" id="rahul" style="top: 250px; left: 600px; display: none;">
+        <div class="window-title">
+            <span>[ rahul_profile.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <div class="profile-intro"><div class="avatar" aria-hidden="true">R.</div><div><strong>Hey Im rahul.</strong><p>hi rahul im hungry</p></div></div>
+            <div class="profile-section" style="margin-bottom: 12px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 11px;">BIO</div>
+                <div style="font-size: 9px; color: #000080; margin-bottom: 6px;">> I can make it happen</div>
+                <div style="font-size: 10px; line-height: 1.5; color: #000;">
+                    <div>CS student @ University of Alberta</div>
+                    <div>AI specialist + Finance minor</div>
+                    <div>Founder of Yuunme streetwear</div>
+                    <div>Building at intersection of tech, creativity & commerce</div>
+                    <div>Marketing @ BTM Club</div>
+                    <div>Safety Operator @ UofA Power</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                <div class="profile-section">
+                    <div style="font-weight: 700; color: #0066ff; font-size: 9px;">EMAIL</div>
+                    <div style="font-size: 9px; color: #000;"><a href="mailto:rahulghosh2005@gmail.com">rahulghosh2005@gmail.com</a></div>
+                </div>
+                <div class="profile-section">
+                    <div style="font-weight: 700; color: #0066ff; font-size: 9px;">LINKEDIN</div>
+                    <div style="font-size: 9px;"><a href="https://www.linkedin.com/in/rahulghosh2005/" target="_blank" style="color: #0066ff; text-decoration: none;">rahul ghosh</a></div>
+                </div>
+            </div>
+
+            <div class="profile-section" style="margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px;">LOCATION</div>
+                <div style="font-size: 9px; color: #000;">Calgary • Edmonton • Vancouver, Alberta/BC</div>
+            </div>
+
+            <div class="profile-section" style="margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px; margin-bottom: 4px;">SKILLS</div>
+                <div style="font-size: 9px; color: #000;">
+                    <div><strong>Languages:</strong> Python, Java, C, JavaScript, TypeScript, SQL</div>
+                    <div><strong>Frameworks:</strong> React, Django, Node.js, FastAPI, TensorFlow</div>
+                    <div><strong>Tools:</strong> Git, Docker, Power BI, Figma, VS Code</div>
+                </div>
+            </div>
+
+            <div class="profile-section" style="margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px; margin-bottom: 4px;">EXPERIENCE</div>
+                <div style="font-size: 9px; color: #000;">
+                    <div style="margin-bottom: 6px;"><strong>Cyber Security Intern</strong><br>University of Calgary — 2026</div>
+                    <div style="margin-bottom: 6px;"><strong>MNP Internship</strong><br>Infrastructure Audit, Power BI, AI Agents — 2026</div>
+                    <div style="margin-bottom: 6px;"><strong>AMII</strong><br>Machine Learning Analyst — 2025</div>
+                    <div><strong>Yuunme</strong><br>Founder & Creative Director — 2023–Present</div>
+                </div>
+            </div>
+
+            <div class="profile-section" style="margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px; margin-bottom: 4px;">EDUCATION</div>
+                <div style="font-size: 9px; color: #000;"><strong>University of Alberta</strong><br>BSc Computer Science — AI Spec, Finance Minor</div>
+            </div>
+
+            <div class="profile-section">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px; margin-bottom: 4px;">INTERESTS</div>
+                <div style="font-size: 9px; color: #000;">Algorithmic trading • ML • Streetwear entrepreneurship • Sports analytics • Digital art • Music production</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Drawings Window -->
+    <div class="window" id="savedDrawings" style="top: 400px; left: 200px; width: 280px; display: none;">
+        <div class="window-title">
+            <span>[ saved_drawings.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <h2 style="font-size: 12px;">Saved Drawings</h2>
+            <div class="saved-drawings-grid" id="savedDrawingsGallery">
+                <div style="text-align: center; padding: 20px; color: #000080; font-size: 10px; font-weight: 700;">
+                    Your drawings will appear here
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside class="drawing-controls" aria-label="Drawing tools">
+        <span class="tool-label">DESKTOP<br>PAINT.EXE</span>
+        <button class="control-btn" id="brushToggle" onclick="toggleBrush()" aria-pressed="false" title="Toggle brush (B)">✎ BRUSH</button>
+        <button class="control-btn" id="eraserToggle" onclick="toggleEraser()" aria-pressed="false" title="Toggle eraser (E)">▱ ERASE</button>
+        <div class="palette" aria-label="Brush colors">
+            <button class="color-swatch" style="--swatch:#ff4c92" data-color="#ff4c92" onclick="selectColor(this)" aria-label="Pink brush" aria-pressed="true"></button>
+            <button class="color-swatch" style="--swatch:#0649ed" data-color="#0649ed" onclick="selectColor(this)" aria-label="Blue brush" aria-pressed="false"></button>
+            <button class="color-swatch" style="--swatch:#142450" data-color="#142450" onclick="selectColor(this)" aria-label="Navy brush" aria-pressed="false"></button>
+        </div>
+        <label class="sr-only" for="brushSize">Brush size</label>
+        <select id="brushSize" class="brush-size"><option value="1">1px</option><option value="3">3px</option><option value="5" selected>5px</option><option value="12">12px</option></select>
+        <button class="control-btn" id="undoButton" onclick="undoDrawing()" aria-label="Undo last stroke" title="Undo (Z)">↶</button>
+        <button class="control-btn" onclick="clearCanvas()">CLEAR</button>
+        <button class="control-btn danger" onclick="saveDrawing()">↓ SAVE</button>
+    </aside>
+    <footer class="taskbar">
+        <button id="startButton" class="start-btn" aria-expanded="false" aria-controls="startMenu">✦ START</button>
+        <div id="taskList" class="task-list" aria-label="Open windows"></div>
+        <div class="system-tray"><time id="clock"></time></div>
+    </footer>
+    <nav id="startMenu" class="start-menu" aria-label="Start menu" hidden>
+        <header>RAHUL OS / v1.0</header>
+        <button onclick="showWindow('dev')">⌘ &nbsp; Software & projects</button>
+        <button onclick="showWindow('art')">▧ &nbsp; Digital art</button>
+        <button onclick="showWindow('music')">♫ &nbsp; Music studio</button>
+        <button onclick="showWindow('rahul')">☺ &nbsp; About Rahul</button>
+        <button onclick="showWindow('savedDrawings')">✎ &nbsp; Your sketchbook</button>
+        <button onclick="setDesktopName(true)">↗ &nbsp; Show desktop name</button>
+        <button onclick="resetDesktop()">↻ &nbsp; Tidy desktop</button>
+        <footer>B · brush &nbsp; Z · undo &nbsp; ⌘/Ctrl K · find</footer>
+    </nav>
+    <dialog id="animationDialog" class="animation-dialog" aria-labelledby="animationTitle">
+        <div class="window-title">
+            <span id="animationTitle">[ animation.mp4 ]</span>
+            <button class="window-control close-btn" onclick="document.getElementById('animationDialog').close()" aria-label="Close animation">×</button>
+        </div>
+        <video id="animationPlayer" class="art-item-video" controls playsinline preload="none" poster="assets/art/animation-thumbnail.jpg" aria-label="Animation">
+            <source src="assets/art/animation.mp4" type="video/mp4">
+            <a href="assets/art/animation.mp4">Watch Animation</a>
+        </video>
+    </dialog>
+    <div id="toast" class="toast" role="status" hidden></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
