@@ -1385,3 +1385,15 @@ h3 {
 .animation-dialog::backdrop { background: #142450b8; }
 .animation-dialog .window-title { background: var(--blue); cursor: default; }
 .animation-dialog video { max-height: calc(100dvh - 90px); object-fit: contain; }
+
+/* Keep mobile window controls easy to tap, separate from the drag handle. */
+.window-controls { flex-shrink: 0; }
+.window-title > span:first-child { min-width: 0; }
+.window-control { touch-action: manipulation; }
+@media (max-width: 700px), (pointer: coarse) {
+    .window-title { min-height: 56px; }
+    .window-control { width: 44px; height: 44px; flex-shrink: 0; font-size: 21px; }
+    .window-controls { gap: 5px; }
+    .name-dismiss { width: 36px; height: 36px; }
+    .animation-dialog video { max-height: calc(100dvh - 110px); }
+}

@@ -9,6 +9,22 @@ const appNames = { dev: 'Dev', art: 'Art', music: 'Music', rahul: 'Rahul', saved
 let zIndex = 100;
 let focusedWindow = null;
 let toastTimer;
+// Touch controls activate on release; ignore the follow-up compatibility click.
+function bindWindowControl(button, activate) {
+    let lastTouch = -Infinity;
+    button.addEventListener('pointerup', event => {
+        if (event.pointerType !== 'touch' || !event.isPrimary) return;
+        const rect = button.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) return;
+        lastTouch = performance.now();
+        event.stopPropagation();
+        activate();
+    });
+    button.addEventListener('click', event => {
+        if (event.detail !== 0 && performance.now() - lastTouch < 700) return;
+        activate();
+    });
+}
 function notify(message) {
     $('#toast').textContent = message;
     $('#toast').hidden = false;
@@ -109,7 +125,7 @@ windows.forEach((panel, index) => {
         button.textContent = symbol;
         button.dataset.action = action;
         button.setAttribute('aria-label', label);
-        button.onclick = () => action === 'maximize' ? maximizeWindow(panel.id) : hideWindow(panel.id, action === 'close');
+        bindWindowControl(button, () => action === 'maximize' ? maximizeWindow(panel.id) : hideWindow(panel.id, action === 'close'));
         controls.append(button);
     }
     title.append(controls);
@@ -122,7 +138,9 @@ windows.forEach((panel, index) => {
     footer.append(status);
     if (panel.id !== 'art') footer.append(hint);
     panel.append(footer);
-    panel.addEventListener('pointerdown', () => focusWindow(panel));
+    panel.addEventListener('pointerdown', event => {
+        if (!event.target.closest('button, a, input, select, video')) focusWindow(panel);
+    });
     title.addEventListener('dblclick', event => { if (!event.target.closest('button')) maximizeWindow(panel.id); });
     let drag;
     title.addEventListener('pointerdown', event => {
