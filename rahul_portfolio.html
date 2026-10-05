@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAHUL | Portfolio Canvas</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            cursor: default;
+            background-image:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.03) 0px,
+                    rgba(0, 0, 0, 0.03) 2px,
+                    transparent 2px,
+                    transparent 4px
+                ),
+                radial-gradient(ellipse at center, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
+            background-size: 100% 4px, 200% 200%;
+            background-position: 0 0, center center;
+        }
+
+        body.brush-mode {
+            cursor: crosshair;
+        }
+
+        /* Canvas for drawing */
+        #drawingCanvas {
+            position: fixed;
+            top: 100px;
+            left: 0;
+            display: block;
+            background: #ffffff;
+            z-index: 1;
+            background-image:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.03) 0px,
+                    rgba(0, 0, 0, 0.03) 2px,
+                    transparent 2px,
+                    transparent 4px
+                );
+        }
+
+        /* Top Menu Bar */
+        .menu-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(to bottom, #0066ff, #0044cc);
+            border-bottom: 4px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            z-index: 1000;
+            padding: 0 40px;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        .menu-icon:hover {
+            transform: scale(1.15);
+        }
+
+        .menu-icon:active {
+            transform: scale(0.95);
+        }
+
+        .menu-icon * {
+            pointer-events: none;
+        }
+
+        /* Pixelated icons */
+        .icon-pixel {
+            font-size: 16px;
+            line-height: 16px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            image-rendering: pixelated;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .icon-pixel:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        .icon-pixel:active {
+            transform: scale(0.95);
+        }
+
+        .icon-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 3px;
+            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Search bar in menu */
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            padding: 4px 8px;
+            gap: 6px;
+            border-radius: 2px;
+        }
+
+        .search-input {
+            background: #ffffff;
+            border: none;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            width: 180px;
+            outline: none;
+            color: #000;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .search-btn {
+            background: #ffff00;
+            color: #000;
+            border: 1px solid #000;
+            padding: 2px 6px;
+            font-size: 9px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.1s;
+        }
+
+        .search-btn:hover {
+            background: #ffff00;
+            transform: translate(-1px, -1px);
+        }
+
+        .search-btn:active {
+            transform: translate(1px, 1px);
+        }
+
+        /* Highlight styling for search results */
+        .search-highlight {
+            background: #ffff00;
+            color: #000;
+            font-weight: 700;
+            padding: 2px 0;
+            box-shadow: 0 0 0 2px #ff0080;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 20px;
+            top: 28px;
+            background: #ffff00;
+            border: 3px solid #000;
+            padding: 8px 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.1s;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        .toggle-btn:hover {
+            background: #ffff00;
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .toggle-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .toggle-btn.active {
+            background: #ff0080;
+            color: #fff;
+        }
+
+        /* Draggable Windows */
+        .window {
+            position: fixed;
+            background: #e0e0e0;
+            border: 6px solid;
+            border-color: #dfdfdf #808080 #808080 #dfdfdf;
+            box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #000, 3px 3px 0 rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            font-family: 'JetBrains Mono', monospace;
+            user-select: none;
+            cursor: move;
+            min-width: 350px;
+            max-width: 650px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .window-title {
+            background: linear-gradient(to right, #000080, #1084d7);
+            color: white;
+            padding: 2px 4px;
+            font-weight: 700;
+            font-size: 12px;
+            border-bottom: 2px solid #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: 1px;
+            cursor: grab;
+            user-select: none;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .window-title:active {
+            cursor: grabbing;
+        }
+
+        .close-btn {
+            width: 18px;
+            height: 14px;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #dfdfdf #808080 #808080 #dfdfdf;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 10px;
+            cursor: pointer;
+            user-select: none;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .close-btn:active {
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
+        }
+
+        .window-content {
+            padding: 12px;
+            overflow-y: auto;
+            flex: 1;
+            font-size: 11px;
+            line-height: 1.5;
+            background: #c0c0c0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .window-content::-webkit-scrollbar {
+            width: 14px;
+        }
+
+        .window-content::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border: 1px solid #dfdfdf;
+        }
+
+        .window-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(to right, #0066ff, #0044cc);
+            border: 1px solid #000;
+        }
+
+        /* Content Styling */
+        h2 {
+            color: #000080;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #000080;
+            padding-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        h3 {
+            color: #ff0080;
+            font-weight: 700;
+            font-size: 12px;
+            margin-top: 12px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .github-link {
+            display: inline-block;
+            background: #000080;
+            color: #fff;
+            padding: 4px 8px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            border: 2px solid #000;
+            font-weight: 700;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .github-link:hover {
+            background: #0066ff;
+            transform: translate(-1px, -1px);
+        }
+
+        .github-link:active {
+            transform: translate(1px, 1px);
+        }
+
+        .current-projects {
+            background: #ffff00;
+            border: 3px solid #000;
+            padding: 10px;
+            margin: 12px 0;
+            box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #000;
+        }
+
+        .current-projects h3 {
+            color: #000080;
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .project {
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #808080;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .project:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .project-title {
+            font-weight: 700;
+            color: #000080;
+            margin-bottom: 3px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .project-desc {
+            font-size: 10px;
+            line-height: 1.3;
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #0066ff;
+            color: #fff;
+            padding: 1px 4px;
+            font-size: 9px;
+            margin: 2px 2px 2px 0;
+            font-weight: 600;
+            border: 1px solid #000;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Art Gallery */
+        .art-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .art-item {
+            border: 2px solid #000;
+            background: #fff;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .art-item:hover {
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+            transform: translate(-1px, -1px);
+        }
+
+        .art-item-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            background: #e0e0e0;
+        }
+
+        .art-item-info {
+            padding: 8px;
+            background: #c0c0c0;
+            border-top: 2px solid #000;
+        }
+
+        .art-item-title {
+            font-weight: 700;
+            color: #000080;
+            margin-bottom: 3px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .art-item-desc {
+            font-size: 10px;
+            line-height: 1.2;
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Contact items */
+        .contact-item {
+            margin: 8px 0;
+            padding: 6px;
+            background: #fff;
+            border: 1px solid #000;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .contact-label {
+            font-weight: 700;
+            color: #000080;
+            font-size: 10px;
+            margin-bottom: 2px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .contact-value {
+            font-size: 11px;
+            word-break: break-all;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Resume styling */
+        .resume-section {
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .resume-header {
+            font-weight: 700;
+            color: #000080;
+            margin-top: 6px;
+            margin-bottom: 4px;
+            font-size: 10px;
+            text-transform: uppercase;
+            border-left: 3px solid #000080;
+            padding-left: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .resume-item {
+            margin-bottom: 4px;
+            font-size: 10px;
+            line-height: 1.2;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .resume-title {
+            font-weight: 600;
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .resume-subtitle {
+            color: #444;
+            font-size: 9px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Drawing controls */
+        .drawing-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+        }
+
+        .control-btn {
+            background: #ffff00;
+            border: 3px solid #000;
+            padding: 10px 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.1s;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        .control-btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .control-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .control-btn.danger {
+            background: #ff0080;
+            color: #fff;
+        }
+
+        /* Saved drawings */
+        .saved-drawings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .saved-drawing-item {
+            border: 2px solid #000;
+            background: #fff;
+            padding: 4px;
+        }
+
+        .saved-drawing-image {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            background: #e0e0e0;
+            display: block;
+            border: 1px solid #808080;
+            margin-bottom: 4px;
+        }
+
+        .saved-drawing-delete {
+            width: 100%;
+            background: #ff0080;
+            color: #fff;
+            border: 1px solid #000;
+            padding: 3px;
+            font-size: 9px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.1s;
+        }
+
+        .saved-drawing-delete:hover {
+            background: #ff3300;
+        }
+
+        /* Error message styling */
+        .error-dialog {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            line-height: 48px;
+        }
+
+        .error-title {
+            font-weight: 700;
+            color: #000080;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .error-message {
+            font-size: 11px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .error-button {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #dfdfdf #808080 #808080 #dfdfdf;
+            padding: 4px 16px;
+            font-weight: 700;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            min-width: 60px;
+            transition: all 0.1s;
+        }
+
+        .error-button:hover {
+            border-color: #dfdfdf #808080 #808080 #dfdfdf;
+        }
+
+        .error-button:active {
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
+        }
+
+        /* Typewriter effect */
+        .typewriter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            line-height: 1.6;
+            color: #000;
+            min-height: auto;
+            white-space: normal;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .bio-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .bio-title {
+            font-weight: 700;
+            color: #000080;
+            font-size: 12px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #000080;
+            padding-bottom: 4px;
+        }
+
+        .bio-tagline {
+            color: #0066ff;
+            font-weight: 700;
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .coming-soon {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #000080;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Menu Bar -->
+    <div class="menu-bar">
+        <div class="menu-icon" onclick="showWindow('dev'); return false;">
+            <div class="icon-pixel">◾</div>
+            <div class="icon-label">Dev</div>
+        </div>
+        <div class="menu-icon" onclick="showWindow('art'); return false;">
+            <div class="icon-pixel">🖼</div>
+            <div class="icon-label">Art</div>
+        </div>
+        <div class="menu-icon" onclick="showWindow('music'); return false;">
+            <div class="icon-pixel">♪</div>
+            <div class="icon-label">Music</div>
+        </div>
+        <div class="menu-icon" onclick="showWindow('rahul'); return false;">
+            <div class="icon-pixel">◉</div>
+            <div class="icon-label">Rahul</div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="search..." onkeyup="performSearch(this.value)">
+            <button class="search-btn" onclick="nextMatch()">→</button>
+            <div id="matchCount" style="color: #fff; font-size: 9px; min-width: 40px; text-align: center; font-family: 'JetBrains Mono', monospace; font-weight: 700;"></div>
+        </div>
+    </div>
+
+    <!-- Canvas for drawing -->
+    <canvas id="drawingCanvas"></canvas>
+
+    <!-- Windows -->
+    <!-- Software Dev Window -->
+    <div class="window" id="dev" style="top: 150px; left: 100px;">
+        <div class="window-title">
+            <span>[ software_dev.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <a href="https://github.com/rahulghosh05" target="_blank" class="github-link">→ GITHUB</a>
+
+            <div class="current-projects">
+                <h3>>>> CURRENT PROJECTS <<<</h3>
+                <div class="project">
+                    <div class="project-title">MUSE</div>
+                    <div class="project-desc">React/TypeScript inspiration curation app. Chrome extension + iOS companion. Supabase sync.</div>
+                    <div><span class="tag">React</span><span class="tag">TS</span><span class="tag">Supabase</span></div>
+                </div>
+            </div>
+
+            <h2>Featured</h2>
+
+            <div class="project">
+                <div class="project-title">AirKeys</div>
+                <div class="project-desc">Gesture-controlled virtual piano. Camera-based hand tracking for music production.</div>
+                <div><span class="tag">ML</span><span class="tag">CV</span><span class="tag">Audio</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">BonBon</div>
+                <div class="project-desc">Multi-agent NBA/sports betting AI. Debate format analytics for predictions.</div>
+                <div><span class="tag">AI</span><span class="tag">Finance</span><span class="tag">LLM</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">Market Daemon</div>
+                <div class="project-desc">24/7 market monitoring & paper trading. Real-time data analysis & strategy execution.</div>
+                <div><span class="tag">Trading</span><span class="tag">Python</span><span class="tag">APIs</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">CMPUT 404</div>
+                <div class="project-desc">Django wiki app. Markdown editor, emoji picker, social features.</div>
+                <div><span class="tag">Django</span><span class="tag">Python</span><span class="tag">Web</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">MNP Internship</div>
+                <div class="project-desc">Infrastructure audit, Power BI dashboards, custom audit tools, Copilot agents.</div>
+                <div><span class="tag">PowerBI</span><span class="tag">Audit</span><span class="tag">AI</span></div>
+            </div>
+
+            <div class="project">
+                <div class="project-title">TreeHacks 2027</div>
+                <div class="project-desc">Stanford hackathon. AI & full-stack exploration.</div>
+                <div><span class="tag">Hackathon</span><span class="tag">Innovation</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Digital Art Window -->
+    <div class="window" id="art" style="top: 180px; left: 750px; display: none;">
+        <div class="window-title">
+            <span>[ digital_art.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <h2>Digital Art</h2>
+
+            <div class="art-gallery" id="artGallery">
+                <!-- Art items will be added here via JavaScript -->
+                <div style="text-align: center; padding: 20px; color: #000080; font-weight: 700;">
+                    Upload your art images to display them here
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Window -->
+    <div class="window" id="music" style="top: 220px; left: 450px; display: none;">
+        <div class="window-title">
+            <span>[ music_projects.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <div class="error-dialog">
+                <div class="error-icon">⚠️</div>
+                <div class="error-title">music_projects.exe</div>
+                <div class="error-message">
+                    MODULE NOT FOUND<br><br>
+                    The music_projects module is not yet<br>
+                    initialized in this build.<br><br>
+                    Please check back soon for<br>
+                    production updates and releases.
+                </div>
+                <button class="error-button" onclick="this.parentElement.parentElement.parentElement.style.display='none';">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rahul Bio/Contact/Resume Window -->
+    <div class="window" id="rahul" style="top: 250px; left: 600px; display: none;">
+        <div class="window-title">
+            <span>[ rahul_profile.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <div style="margin-bottom: 12px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 11px;">BIO</div>
+                <div style="font-size: 9px; color: #000080; margin-bottom: 6px;">> I can make it happen</div>
+                <div style="font-size: 10px; line-height: 1.5; color: #000;">
+                    <div>CS student @ University of Alberta</div>
+                    <div>AI specialist + Finance minor</div>
+                    <div>Founder of Yuunme streetwear</div>
+                    <div>Building at intersection of tech, creativity & commerce</div>
+                    <div>Marketing @ BTM Club</div>
+                    <div>Safety Operator @ UofA Power</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                <div>
+                    <div style="font-weight: 700; color: #0066ff; font-size: 9px;">EMAIL</div>
+                    <div style="font-size: 9px; color: #000;">rahulghosh2005@gmail.com</div>
+                </div>
+                <div>
+                    <div style="font-weight: 700; color: #0066ff; font-size: 9px;">LINKEDIN</div>
+                    <div style="font-size: 9px;"><a href="https://www.linkedin.com/in/rahulghosh2005/" target="_blank" style="color: #0066ff; text-decoration: none;">rahul ghosh</a></div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px;">LOCATION</div>
+                <div style="font-size: 9px; color: #000;">Calgary • Edmonton • Vancouver, Alberta/BC</div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px; margin-bottom: 4px;">SKILLS</div>
+                <div style="font-size: 9px; color: #000;">
+                    <div><strong>Languages:</strong> Python, Java, C, JavaScript, TypeScript, SQL</div>
+                    <div><strong>Frameworks:</strong> React, Django, Node.js, FastAPI, TensorFlow</div>
+                    <div><strong>Tools:</strong> Git, Docker, Power BI, Figma, VS Code</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px; margin-bottom: 4px;">EXPERIENCE</div>
+                <div style="font-size: 9px; color: #000;">
+                    <div style="margin-bottom: 6px;"><strong>Cyber Security Intern</strong><br>University of Calgary — 2026</div>
+                    <div style="margin-bottom: 6px;"><strong>MNP Internship</strong><br>Infrastructure Audit, Power BI, AI Agents — 2026</div>
+                    <div style="margin-bottom: 6px;"><strong>AMII</strong><br>Machine Learning Analyst — 2025</div>
+                    <div><strong>Yuunme</strong><br>Founder & Creative Director — 2023–Present</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px; margin-bottom: 4px;">EDUCATION</div>
+                <div style="font-size: 9px; color: #000;"><strong>University of Alberta</strong><br>BSc Computer Science — AI Spec, Finance Minor</div>
+            </div>
+
+            <div>
+                <div style="font-weight: 700; color: #0066ff; font-size: 9px; margin-bottom: 4px;">INTERESTS</div>
+                <div style="font-size: 9px; color: #000;">Algorithmic trading • ML • Streetwear entrepreneurship • Sports analytics • Digital art • Music production</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Drawings Window -->
+    <div class="window" id="savedDrawings" style="top: 400px; left: 200px; width: 280px; display: none;">
+        <div class="window-title">
+            <span>[ saved_drawings.exe ]</span>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none';">×</span>
+        </div>
+        <div class="window-content">
+            <h2 style="font-size: 12px;">Saved Drawings</h2>
+            <div class="saved-drawings-grid" id="savedDrawingsGallery">
+                <div style="text-align: center; padding: 20px; color: #000080; font-size: 10px; font-weight: 700;">
+                    Your drawings will appear here
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawing Controls -->
+    <div class="drawing-controls">
+        <button class="control-btn" id="brushToggle" onclick="toggleBrush()">BRUSH</button>
+        <button class="control-btn" onclick="clearCanvas()">CLEAR</button>
+        <button class="control-btn danger" onclick="saveDrawing()">SAVE</button>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - 100;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Add scanline effect
+            ctx.globalAlpha = 0.03;
+            for (let i = 0; i < canvas.height; i += 4) {
+                ctx.fillRect(0, i, canvas.width, 2);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Drawing state
+        let isDrawing = false;
+        let isBrushMode = false;
+        const brushSize = 5;
+        const brushColor = '#ff0080';
+
+        // Drawing functions
+        canvas.addEventListener('mousedown', (e) => {
+            if (!isBrushMode) return;
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing || !isBrushMode) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = brushColor;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        // Brush toggle
+        function toggleBrush() {
+            isBrushMode = !isBrushMode;
+            const toggle = document.getElementById('brushToggle');
+            document.body.classList.toggle('brush-mode', isBrushMode);
+            toggle.classList.toggle('active', isBrushMode);
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 0.03;
+            for (let i = 0; i < canvas.height; i += 4) {
+                ctx.fillRect(0, i, canvas.width, 2);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Drawing storage
+        let savedDrawings = [];
+
+        function saveDrawing() {
+            const timestamp = new Date().toLocaleTimeString();
+            const imageData = canvas.toDataURL('image/png');
+
+            savedDrawings.unshift({
+                id: Date.now(),
+                data: imageData,
+                timestamp: timestamp
+            });
+
+            // Show the saved drawings window
+            document.getElementById('savedDrawings').style.display = 'flex';
+
+            // Add to gallery
+            updateSavedDrawingsGallery();
+
+            // Offer to download
+            const link = document.createElement('a');
+            link.href = imageData;
+            link.download = `rahul-drawing-${Date.now()}.png`;
+            link.click();
+        }
+
+        function updateSavedDrawingsGallery() {
+            const gallery = document.getElementById('savedDrawingsGallery');
+
+            if (savedDrawings.length === 0) {
+                gallery.innerHTML = '<div style="text-align: center; padding: 20px; color: #000080; font-size: 10px; font-weight: 700;">Your drawings will appear here</div>';
+                return;
+            }
+
+            gallery.innerHTML = '';
+
+            savedDrawings.forEach((drawing) => {
+                const item = document.createElement('div');
+                item.className = 'saved-drawing-item';
+                item.innerHTML = `
+                    <img src="${drawing.data}" alt="Drawing" class="saved-drawing-image">
+                    <div style="font-size: 9px; color: #000; margin-bottom: 4px; text-align: center;">${drawing.timestamp}</div>
+                    <button class="saved-drawing-delete" onclick="deleteSavedDrawing(${drawing.id})">DELETE</button>
+                `;
+                gallery.appendChild(item);
+            });
+        }
+
+        function deleteSavedDrawing(id) {
+            savedDrawings = savedDrawings.filter(d => d.id !== id);
+            updateSavedDrawingsGallery();
+        }
+
+        // Art gallery - you can add art items by calling addArtItem()
+        function addArtItem(imageSrc, title, description) {
+            const gallery = document.getElementById('artGallery');
+
+            // Remove placeholder if this is first item
+            if (gallery.children.length === 1) {
+                gallery.innerHTML = '';
+            }
+
+            const item = document.createElement('div');
+            item.className = 'art-item';
+            item.innerHTML = `
+                <img src="${imageSrc}" alt="${title}" class="art-item-image">
+                <div class="art-item-info">
+                    <div class="art-item-title">${title}</div>
+                    <div class="art-item-desc">${description}</div>
+                </div>
+            `;
+            gallery.appendChild(item);
+        }
+
+        // Window management
+        let draggedWindow = null;
+        let offset = { x: 0, y: 0 };
+        let zIndex = 100;
+
+        function showWindow(windowId) {
+            const window = document.getElementById(windowId);
+            window.style.display = 'flex';
+            window.style.zIndex = ++zIndex;
+        }
+
+        document.addEventListener('mousedown', (e) => {
+            const windowTitle = e.target.closest('.window-title');
+            if (windowTitle) {
+                draggedWindow = windowTitle.closest('.window');
+                const rect = draggedWindow.getBoundingClientRect();
+                offset.x = e.clientX - rect.left;
+                offset.y = e.clientY - rect.top;
+                draggedWindow.style.zIndex = ++zIndex;
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (draggedWindow) {
+                draggedWindow.style.left = (e.clientX - offset.x) + 'px';
+                draggedWindow.style.top = (e.clientY - offset.y) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            draggedWindow = null;
+        });
+
+        // Advanced search functionality (like Ctrl+F)
+        let currentMatchIndex = 0;
+        let allMatches = [];
+
+        function clearHighlights() {
+            // Remove all highlight spans and restore original text
+            document.querySelectorAll('.search-highlight').forEach(el => {
+                const parent = el.parentNode;
+                while (el.firstChild) {
+                    parent.insertBefore(el.firstChild, el);
+                }
+                parent.removeChild(el);
+                parent.normalize();
+            });
+        }
+
+        function highlightMatches(query) {
+            if (!query.trim()) {
+                clearHighlights();
+                allMatches = [];
+                currentMatchIndex = 0;
+                // Show all windows
+                document.querySelectorAll('.window').forEach(w => {
+                    w.style.display = 'flex';
+                });
+                return;
+            }
+
+            clearHighlights();
+            allMatches = [];
+            currentMatchIndex = 0;
+
+            const lowerQuery = query.toLowerCase();
+            const windowContents = document.querySelectorAll('.window');
+
+            windowContents.forEach(window => {
+                const content = window.querySelector('.window-content');
+                if (!content) return;
+
+                // Create a walker to traverse all text nodes
+                const walker = document.createTreeWalker(
+                    content,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+
+                let node;
+                let windowHasMatch = false;
+                const nodesToHighlight = [];
+
+                while (node = walker.nextNode()) {
+                    const text = node.nodeValue;
+                    const lowerText = text.toLowerCase();
+                    let index = lowerText.indexOf(lowerQuery);
+
+                    if (index !== -1) {
+                        windowHasMatch = true;
+                        // Store info about this match for later processing
+                        while (index !== -1) {
+                            nodesToHighlight.push({
+                                node: node,
+                                index: index,
+                                length: query.length
+                            });
+                            index = lowerText.indexOf(lowerQuery, index + 1);
+                        }
+                    }
+                }
+
+                // Highlight all matches in this window
+                nodesToHighlight.forEach(match => {
+                    const span = document.createElement('span');
+                    span.className = 'search-highlight';
+                    const text = match.node.nodeValue;
+                    const highlightedText = text.substring(match.index, match.index + match.length);
+                    const beforeText = text.substring(0, match.index);
+                    const afterText = text.substring(match.index + match.length);
+
+                    const before = document.createTextNode(beforeText);
+                    const after = document.createTextNode(afterText);
+
+                    span.textContent = highlightedText;
+
+                    match.node.parentNode.insertBefore(before, match.node);
+                    match.node.parentNode.insertBefore(span, match.node);
+                    match.node.parentNode.insertBefore(after, match.node);
+                    match.node.parentNode.removeChild(match.node);
+
+                    allMatches.push(span);
+                });
+
+                // Show/hide window based on matches
+                window.style.display = windowHasMatch ? 'flex' : 'none';
+            });
+
+            // Scroll to and highlight first match
+            if (allMatches.length > 0) {
+                scrollToMatch(0);
+            }
+        }
+
+        function scrollToMatch(index) {
+            if (allMatches.length === 0) return;
+
+            const match = allMatches[index];
+            const window = match.closest('.window');
+
+            if (window) {
+                window.style.zIndex = ++zIndex;
+                const content = window.querySelector('.window-content');
+                match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            currentMatchIndex = index;
+        }
+
+        function performSearch(query) {
+            highlightMatches(query);
+            updateMatchCount();
+        }
+
+        function updateMatchCount() {
+            const countEl = document.getElementById('matchCount');
+            if (allMatches.length === 0) {
+                countEl.textContent = '';
+            } else {
+                countEl.textContent = `${currentMatchIndex + 1}/${allMatches.length}`;
+            }
+        }
+
+        function nextMatch() {
+            if (allMatches.length > 0) {
+                const nextIndex = (currentMatchIndex + 1) % allMatches.length;
+                scrollToMatch(nextIndex);
+                updateMatchCount();
+            }
+        }
+
+        // Listen for Enter key to go to next match
+        document.getElementById('searchInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                nextMatch();
+            }
+        });
+
+        // Optimized typewriter effect
+        // Show first window on load
+        window.addEventListener('load', () => {
+            showWindow('dev');
+        });
+    </script>
+</body>
+</html>
